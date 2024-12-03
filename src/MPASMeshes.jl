@@ -10,19 +10,20 @@ import Random
 
 const TVRecon{TI, TF} = VoronoiOperators.TangentialVelocityReconstruction{max_Edges2, TI, TF} where {max_Edges2}
 
-struct MPASMesh{OnSphere, max_nEdges, TI, TF, TZ, TVR<:TVRecon{TI, TF}} <: AbstractVoronoiMesh{OnSphere, max_nEdges, TI, TF, TZ}
+struct MPASMesh{OnSphere, max_nEdges, TI, TF, TZ, TVR <: TVRecon{TI, TF}} <: AbstractVoronoiMesh{OnSphere, max_nEdges, TI, TF, TZ}
     cells::Cells{OnSphere, max_nEdges, TI, TF, TZ}
     vertices::Vertices{OnSphere, max_nEdges, TI, TF, TZ}
     edges::Edges{OnSphere, max_nEdges, TI, TF, TZ}
     tanVelRec::TVR
     attributes::Dict{String, Union{String, TF, Int32, Int64}}
 
-    function MPASMesh(cells::Cells{OnSphere, max_nEdges, TI, TF, TZ},
+    function MPASMesh(
+            cells::Cells{OnSphere, max_nEdges, TI, TF, TZ},
             vertices::Vertices{OnSphere, max_nEdges, TI, TF, TZ},
             edges::Edges{OnSphere, max_nEdges, TI, TF, TZ},
             tanVelRec::TVR,
             attributes::Dict{String, Union{String, TF, Int32, Int64}}
-        ) where {OnSphere, max_nEdges, TI, TF, TZ, TVR<:TVRecon{TI, TF}}
+        ) where {OnSphere, max_nEdges, TI, TF, TZ, TVR <: TVRecon{TI, TF}}
 
         if !(get_diagram(cells) === get_diagram(vertices) === get_diagram(edges))
             throw(DimensionMismatch("`Cell`, `Vertices` and `Edges` structs are not based on the same Voronoi diagram"))
@@ -63,8 +64,8 @@ end
 MPASMesh(mesh::AbstractVoronoiMesh, tanVelRec::TVRecon) = MPASMesh(mesh.cells, mesh.vertices, mesh.edges, tanVelRec, generate_attributes(mesh))
 MPASMesh(mesh::AbstractVoronoiMesh) = MPASMesh(mesh, TangentialVelocityReconstructionThuburn(mesh))
 
-MPASMesh(N::Integer, lx::Real, ly::Real; density::F = x->1, max_iter::Integer = 20000, rtol::Real = 1e-10) where {F} = MPASMesh(VoronoiMesh(N, lx, ly; density = density, max_iter = max_iter, rtol = rtol))
-MPASMesh(points::AbstractVector{<:Vec}, lx::Real, ly::Real; density::F = x->1, max_iter::Integer = 20000, rtol::Real = 1e-10) where {F} = MPASMesh(VoronoiMesh(points, lx, ly; density = density, max_iter = max_iter, rtol = rtol))
+MPASMesh(N::Integer, lx::Real, ly::Real; density::F = x -> 1, max_iter::Integer = 20000, rtol::Real = 1.0e-10) where {F} = MPASMesh(VoronoiMesh(N, lx, ly; density = density, max_iter = max_iter, rtol = rtol))
+MPASMesh(points::AbstractVector{<:Vec}, lx::Real, ly::Real; density::F = x -> 1, max_iter::Integer = 20000, rtol::Real = 1.0e-10) where {F} = MPASMesh(VoronoiMesh(points, lx, ly; density = density, max_iter = max_iter, rtol = rtol))
 
 function compute_mpas_fields!(mesh::MPASMesh)
     mesh.cells.area

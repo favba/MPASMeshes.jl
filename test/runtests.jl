@@ -2,7 +2,7 @@ using NCDatasets, DelaunayTriangulation, MPASMeshes
 using Test
 
 @testset "MPASMeshes.jl" begin
-    for mp in (MPASMesh(33, 1.0, 1.0, rtol=1e-7), MPASMesh("spherical_grid_500km.nc"))
+    for mp in (MPASMesh(33, 1.0, 1.0, rtol = 1.0e-7), MPASMesh("spherical_grid_500km.nc"))
         save("lakdf.nc", mp)
         mp_read = MPASMesh("lakdf.nc")
         Base.Filesystem.rm("lakdf.nc")
@@ -32,4 +32,3 @@ using Test
         @test e1.latitude == e2.latitude
     end
 end
-
