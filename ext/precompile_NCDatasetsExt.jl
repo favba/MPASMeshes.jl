@@ -13,3 +13,10 @@ for N in 10:16
     precompile(Tuple{typeof(NCDatasets.DiskArrays.writeblock!), NCDatasets.Variable{Float64, 2, NCDatasets.NCDataset{Nothing, Base.Missing}}, Base.ReinterpretArray{Float64, 2, NTuple{N, Float64}, Array{NTuple{N, Float64}, 1}, true}, Base.OneTo{Int64}, Vararg{Base.OneTo{Int64}}})
     precompile(Tuple{typeof(NCDatasets._write_data_to_nc), NCDatasets.Variable{Float64, 2, NCDatasets.NCDataset{Nothing, Base.Missing}}, Base.ReinterpretArray{Float64, 2, NTuple{N, Float64}, Array{NTuple{N, Float64}, 1}, true}, Base.OneTo{Int64}, Vararg{Base.OneTo{Int64}}})
 end
+for N in 6:9
+    for N2 in 8:(2N)
+        precompile(VoronoiMeshes.save, (String, MPASMesh{false, N, N2, Int32, Float64, Zeros.Zero}))
+        precompile(VoronoiMeshes.save, (String, MPASMesh{true, N, N2, Int32, Float64, Float64}))
+    end
+end
+

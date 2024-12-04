@@ -1,6 +1,6 @@
 module MPASMeshes
 
-using Zeros, TensorsLite, VoronoiMeshes, VoronoiOperators
+using Zeros, TensorsLite, ImmutableVectors, VoronoiMeshes, VoronoiOperators
 using Reexport
 
 @reexport using VoronoiMeshes
@@ -8,28 +8,31 @@ export MPASMesh
 
 import Random
 
-const TVRecon{TI, TF} = VoronoiOperators.TangentialVelocityReconstruction{max_Edges2, TI, TF} where {max_Edges2}
+include("tangential_velocity_reconstruction.jl")
 
-struct MPASMesh{OnSphere, max_nEdges, TI, TF, TZ, TVR <: TVRecon{TI, TF}} <: AbstractVoronoiMesh{OnSphere, max_nEdges, TI, TF, TZ}
+struct MPASMesh{OnSphere, max_nEdges, max_nEdges2, TI, TF, TZ} <: AbstractVoronoiMesh{OnSphere, max_nEdges, TI, TF, TZ}
     cells::Cells{OnSphere, max_nEdges, TI, TF, TZ}
     vertices::Vertices{OnSphere, max_nEdges, TI, TF, TZ}
     edges::Edges{OnSphere, max_nEdges, TI, TF, TZ}
-    tanVelRec::TVR
+    tanVelRec::TangentialVelocityReconstructionGeneric{max_nEdges2, TI, TF}
     attributes::Dict{String, Union{String, TF, Int32, Int64}}
 
     function MPASMesh(
             cells::Cells{OnSphere, max_nEdges, TI, TF, TZ},
             vertices::Vertices{OnSphere, max_nEdges, TI, TF, TZ},
             edges::Edges{OnSphere, max_nEdges, TI, TF, TZ},
-            tanVelRec::TVR,
+            tanVelRec::TangentialVelocityReconstruction{max_nEdges2, TI, TF},
             attributes::Dict{String, Union{String, TF, Int32, Int64}}
-        ) where {OnSphere, max_nEdges, TI, TF, TZ, TVR <: TVRecon{TI, TF}}
+        ) where {OnSphere, max_nEdges, TI, TF, TZ, max_nEdges2}
 
         if !(get_diagram(cells) === get_diagram(vertices) === get_diagram(edges))
             throw(DimensionMismatch("`Cell`, `Vertices` and `Edges` structs are not based on the same Voronoi diagram"))
         end
 
-        return new{OnSphere, max_nEdges, TI, TF, TZ, TVR}(cells, vertices, edges, tanVelRec, attributes)
+        tvr = TangentialVelocityReconstructionGeneric(tanVelRec)
+        attributes["tangential_velocity_reconstruction_method"] = tvr.type
+
+        return new{OnSphere, max_nEdges, max_nEdges2, TI, TF, TZ}(cells, vertices, edges, tvr, attributes)
     end
 end
 
@@ -61,7 +64,7 @@ function generate_attributes(mesh::AbstractVoronoiMesh{S, N, TI, TF}) where {S, 
     return attrib
 end
 
-MPASMesh(mesh::AbstractVoronoiMesh, tanVelRec::TVRecon) = MPASMesh(mesh.cells, mesh.vertices, mesh.edges, tanVelRec, generate_attributes(mesh))
+MPASMesh(mesh::AbstractVoronoiMesh, tanVelRec::TangentialVelocityReconstruction) = MPASMesh(mesh.cells, mesh.vertices, mesh.edges, tanVelRec, generate_attributes(mesh))
 MPASMesh(mesh::AbstractVoronoiMesh) = MPASMesh(mesh, TangentialVelocityReconstructionThuburn(mesh))
 
 MPASMesh(N::Integer, lx::Real, ly::Real; density::F = x -> 1, max_iter::Integer = 20000, rtol::Real = 1.0e-10) where {F} = MPASMesh(VoronoiMesh(N, lx, ly; density = density, max_iter = max_iter, rtol = rtol))
@@ -94,11 +97,9 @@ function VoronoiMeshes.save(filename, obj::MPASMesh; kwds...)
 end
 
 for N in 6:9
-    for N2 in 10:(2N)
-        precompile(compute_mpas_fields!, (MPASMesh{false, N, Int32, Float64, Zeros.Zero, TangentialVelocityReconstructionThuburn{N2, Int32, Float64}},))
-        precompile(compute_mpas_fields!, (MPASMesh{true, N, Int32, Float64, Float64, TangentialVelocityReconstructionThuburn{N2, Int32, Float64}},))
-        precompile(Tuple{typeof(VoronoiMeshes.save), String, MPASMesh{false, N, Int32, Float64, Zeros.Zero, VoronoiOperators.TangentialVelocityReconstructionThuburn{N2, Int32, Float64}}})
-        precompile(Tuple{typeof(VoronoiMeshes.save), String, MPASMesh{true, N, Int32, Float64, Float64}, VoronoiOperators.TangentialVelocityReconstructionThuburn{N2, Int32, Float64}})
+    for N2 in 8:(2N)
+        precompile(compute_mpas_fields!, (MPASMesh{false, N, N2, Int32, Float64, Zeros.Zero},))
+        precompile(compute_mpas_fields!, (MPASMesh{true, N, N2, Int32, Float64, Float64},))
     end
 end
 

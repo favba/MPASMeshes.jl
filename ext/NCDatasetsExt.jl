@@ -16,8 +16,15 @@ function read_tanVelRecon(::Val{maxEdgesOnEdges}, nEdges::AbstractVector, ncfile
     weightsArray = ncfile["weightsOnEdge"][:, :]::Matrix{Float64}
     copy_matrix_to_tuple_vector!(w_tuple, weightsArray)
 
-    return TangentialVelocityReconstructionThuburn(inds, w)
+    method = if haskey(ncfile.attrib,"tangential_velocity_reconstruction_method")
+        ncfile.attrib["tangential_velocity_reconstruction_method"]::String
+    else
+        "Thuburn"
+    end
+
+    return MPASMeshes.TangentialVelocityReconstructionGeneric(inds, w, inds.length, method)
 end
+
 function read_tanVelRecon(ncfile)
     nEdges = UInt8.(ncfile["nEdgesOnEdge"][:]::Vector{Int32})
     max_n_edges = Int(maximum(nEdges))
@@ -48,11 +55,11 @@ function MPASMeshes.MPASMesh(file_name::String, warn_issues::Bool = true)
     end
 end
 
-function write_tanVelRecon_data!(ds::NCDataset, tanVelRecon::TangentialVelocityReconstructionThuburn{N, TI, TF}) where {N, TI, TF}
+function write_tanVelRecon_data!(ds::NCDataset, tanVelRecon::MPASMeshes.TangentialVelocityReconstructionGeneric{N, TI, TF}) where {N, TI, TF}
     ds.dim["maxEdges2"] = N
 
     defVar(
-        ds, "nEdgesOnEdge", TI.(tanVelRecon.indices.length),
+        ds, "nEdgesOnEdge", TI.(tanVelRecon.nEdges),
         ("nEdges",), attrib = [
             "units" => "-",
             "long_name" => "Number of edges involved in reconstruction of tangential velocity for an edge.",
@@ -78,7 +85,7 @@ function write_tanVelRecon_data!(ds::NCDataset, tanVelRecon::TangentialVelocityR
     return ds
 end
 
-function save_to_netcdf!(ds::NCDataset, mesh::MPASMesh{S, N, TI}; force3D::Bool = true, write_computed::Bool = true) where {S, N, TI}
+function save_to_netcdf!(ds::NCDataset, mesh::MPASMesh{S, N, N2, TI}; force3D::Bool = true, write_computed::Bool = true) where {S, N, N2, TI}
 
     save_to_netcdf!(ds, VoronoiMesh(mesh.cells, mesh.vertices, mesh.edges), force3D = true, write_computed = true)
 
