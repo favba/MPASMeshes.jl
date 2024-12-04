@@ -41,7 +41,7 @@ end
 function MPASMeshes.MPASMesh(ncfile::NCDatasets.NCDataset, warn_issues::Bool = true)
     mesh = _MPASMesh(ncfile)
     if warn_issues
-        Threads.@spawn VoronoiMeshes.warn_issues(check_mesh($mesh), $mesh)
+        Threads.@spawn VoronoiMeshes.warn_mesh_issues($mesh)
     end
     return mesh
 end
