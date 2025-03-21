@@ -103,4 +103,17 @@ for N in 6:9
     end
 end
 
+function write_coeffs_reconstruct_to_grid(velRecon::CellVelocityReconstruction, filename::AbstractString)
+    if VoronoiMeshes.is_netcdf_ext(filename)
+        write_coeffs_reconstruct_to_grid_netcdf(filename, velRecon)
+    else
+        error("Unsupported file extension: $filename")
+    end
+    return nothing
+end
+
+#implemented in NCDatasetsExt.jl
+function write_coeffs_reconstruct_to_grid_netcdf end
+
+
 end
