@@ -88,9 +88,11 @@ function compute_mpas_fields!(mesh::MPASMesh)
 end
 
 function VoronoiMeshes.save(filename, obj::MPASMesh; kwds...)
-    if VoronoiMeshes.is_netcdf_ext(filename)
+    name, ext = Base.Filesystem.splitext(filename)
+    if ext == ".nc"
         compute_mpas_fields!(obj)
         VoronoiMeshes.save_to_netcdf(filename, obj; kwds...)
+        write(name*".graph.info", String(take!(graph_partition(obj))))
     else
         error("Unsupported file extension: $filename")
     end
@@ -105,7 +107,8 @@ for N in 6:9
 end
 
 function write_coeffs_reconstruct_to_grid(velRecon::CellVelocityReconstruction, filename::AbstractString)
-    if VoronoiMeshes.is_netcdf_ext(filename)
+    _, ext = Base.Filesystem.splitext(filename)
+    if ext == ".nc"
         write_coeffs_reconstruct_to_grid_netcdf(filename, velRecon)
     else
         error("Unsupported file extension: $filename")

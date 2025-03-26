@@ -6,6 +6,7 @@ using Test
         save("lakdf.nc", mp)
         mp_read = MPASMesh("lakdf.nc")
         Base.Filesystem.rm("lakdf.nc")
+        Base.Filesystem.rm("lakdf.graph.info")
 
         c1 = mp.cells
         c2 = mp_read.cells
