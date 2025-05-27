@@ -1,9 +1,9 @@
 module MPASMeshes
 
-using Zeros, TensorsLite, ImmutableVectors, VoronoiMeshes, VoronoiOperators
-using Reexport
-
+using Reexport, Zeros, TensorsLite, ImmutableVectors
 @reexport using VoronoiMeshes
+using  VoronoiOperators
+
 export MPASMesh
 export regenerate_mesh
 
@@ -68,8 +68,8 @@ end
 MPASMesh(mesh::AbstractVoronoiMesh, tanVelRec::TangentialVelocityReconstruction) = MPASMesh(mesh.cells, mesh.vertices, mesh.edges, tanVelRec, generate_attributes(mesh))
 MPASMesh(mesh::AbstractVoronoiMesh) = MPASMesh(mesh, TangentialVelocityReconstructionThuburn(mesh))
 
-MPASMesh(N::Integer, lx::Real, ly::Real; density::F = x -> 1, max_iter::Integer = 20000, rtol::Real = 1.0e-10) where {F} = MPASMesh(VoronoiMesh(N, lx, ly; density = density, max_iter = max_iter, rtol = rtol))
-MPASMesh(points::AbstractVector{<:Vec}, lx::Real, ly::Real; density::F = x -> 1, max_iter::Integer = 20000, rtol::Real = 1.0e-10) where {F} = MPASMesh(VoronoiMesh(points, lx, ly; density = density, max_iter = max_iter, rtol = rtol))
+MPASMesh(N::Integer, lx::Real, ly::Real; kwd...) = MPASMesh(VoronoiMesh(N, lx, ly; kwd...))
+MPASMesh(points::AbstractVector{<:Vec}, lx::Real, ly::Real; kwd...) = MPASMesh(VoronoiMesh(points, lx, ly; kwd...))
 
 function compute_mpas_fields!(mesh::MPASMesh)
     mesh.cells.area
@@ -106,7 +106,7 @@ for N in 6:9
     end
 end
 
-function write_coeffs_reconstruct_to_grid(velRecon::CellVelocityReconstruction, filename::AbstractString)
+function write_coeffs_reconstruct_to_grid(velRecon::Union{<:CellVelocityReconstruction,<:VertexVelocityReconstruction}, filename::AbstractString)
     _, ext = Base.Filesystem.splitext(filename)
     if ext == ".nc"
         write_coeffs_reconstruct_to_grid_netcdf(filename, velRecon)
@@ -116,8 +116,19 @@ function write_coeffs_reconstruct_to_grid(velRecon::CellVelocityReconstruction, 
     return nothing
 end
 
+function write_coeffs_scalar_reconstruct_to_grid(edgeToCell::EdgeToCellTransformation, filename::AbstractString)
+    _, ext = Base.Filesystem.splitext(filename)
+    if ext == ".nc"
+        write_coeffs_scalar_reconstruct_to_grid_netcdf(filename, edgeToCell)
+    else
+        error("Unsupported file extension: $filename")
+    end
+    return nothing
+end
+
 #implemented in NCDatasetsExt.jl
 function write_coeffs_reconstruct_to_grid_netcdf end
+function write_coeffs_scalar_reconstruct_to_grid_netcdf end
 
 """
     regenerate_mesh(input_mesh_name::AbstractString, out_file_name::AbstractString, [method::AbstractString = "trisk"]) -> nothing
@@ -134,10 +145,42 @@ function regenerate_mesh(inputfile::AbstractString, outputname::AbstractString, 
     if method == "trisk"
         mpas_mesh = MPASMesh(v_mesh)
         save(outputname, mpas_mesh)
+    elseif method == "trisk_tangent_ke_area"
+        mpas_mesh = MPASMesh(v_mesh)
+        save(outputname, mpas_mesh)
+        write_coeffs_scalar_reconstruct_to_grid(EdgeToCellArea(mpas_mesh), outputname)
+    elseif method == "trisk_tangent_ke_lsq2"
+        mpas_mesh = MPASMesh(v_mesh)
+        save(outputname, mpas_mesh)
+        write_coeffs_scalar_reconstruct_to_grid(EdgeToCellLSq2(mpas_mesh), outputname)
+    elseif method == "trisk_tangent_ke_lsq3"
+        mpas_mesh = MPASMesh(v_mesh)
+        save(outputname, mpas_mesh)
+        write_coeffs_scalar_reconstruct_to_grid(EdgeToCellLSq3(mpas_mesh), outputname)
     elseif method == "peixoto"
         mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
         save(outputname, mpas_mesh)
         write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+    elseif method == "peixoto_vertex"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionPerot(mpas_mesh), outputname)
+    elseif method == "peixoto_tangent_ke_area"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+        write_coeffs_scalar_reconstruct_to_grid(EdgeToCellArea(mpas_mesh), outputname)
+    elseif method == "peixoto_tangent_ke_lsq2"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+        write_coeffs_scalar_reconstruct_to_grid(EdgeToCellLSq2(mpas_mesh), outputname)
+    elseif method == "peixoto_tangent_ke_lsq3"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+        write_coeffs_scalar_reconstruct_to_grid(EdgeToCellLSq3(mpas_mesh), outputname)
     else
         error("Method '$method' not implemented")
     end

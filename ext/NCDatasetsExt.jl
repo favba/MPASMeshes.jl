@@ -163,6 +163,80 @@ function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractSt
     return
 end
 
+function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractString, velRecon::VertexVelocityReconstruction{TI, TF, TZ}) where {TI, TF, TZ}
+
+    NCDataset(filename, "a") do ds
+
+        nvertices = length(velRecon.weights)
+
+        weights = if (TZ === TF)
+            reshape(reinterpret(TF, velRecon.weights), (3, 3, nvertices))
+        else
+            wdata = velRecon.weights
+            w = Array{TF}(undef, (3, 3, nvertices))
+            @inbounds for k in Base.OneTo(nvertices)
+                t = wdata[k]
+                for j in Base.OneTo(3)
+                    v = t[j]
+                    w[1, j, k] = v.x
+                    w[2, j, k] = v.y
+                    w[3, j, k] = zero(TF)
+                end
+            end
+            w
+        end
+
+        defVar(
+            ds, "vertex_coeffs_reconstruct", weights,
+            ("R3", "vertexDegree", "nVertices"), attrib = [
+                "units" => "-",
+                "long_name" => "Coefficients to reconstruct velocity vectors at vertices",
+            ]
+        )
+
+        if typeof(velRecon) <: VertexVelocityReconstructionPerot
+            ds.attrib["vertex_velocity_reconstruction_method"] = "Perot"
+        else #Add new methods here
+            error("Not implemented")
+        end
+    end
+
+    return
+end
+
+
+function MPASMeshes.write_coeffs_scalar_reconstruct_to_grid_netcdf(filename::AbstractString, edgeToCell::EdgeToCellTransformation{N_MAX, TI, TF}) where {N_MAX, TI, TF}
+
+    NCDataset(filename, "a") do ds
+
+        ncells = length(edgeToCell.weights)
+
+        weights = reshape(reinterpret(TF, edgeToCell.weights.data), (N_MAX, ncells))
+
+        defVar(
+            ds, "coeffs_scalar_reconstruct", weights,
+            ("maxEdges", "nCells"), attrib = [
+                "units" => "-",
+                "long_name" => "Coefficients to reconstruct edge scalar field at cell centers",
+            ]
+        )
+
+        if typeof(edgeToCell) <: EdgeToCellLSq2
+            ds.attrib["edge_to_cell_method"] = "LSq2"
+        elseif typeof(edgeToCell) <: EdgeToCellLSq3
+            ds.attrib["edge_to_cell_method"] = "LSq3"
+        elseif typeof(edgeToCell) <: EdgeToCellArea
+            ds.attrib["edge_to_cell_method"] = "Area"
+        elseif typeof(edgeToCell) <: EdgeToCellRingler
+            ds.attrib["edge_to_cell_method"] = "Ringler"
+        else #Add new methods here
+            error("Not implemented")
+        end
+    end
+
+    return
+end
+
 include("precompile_NCDatasetsExt.jl")
 
 end # module
