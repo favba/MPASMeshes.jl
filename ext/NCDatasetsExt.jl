@@ -137,9 +137,9 @@ function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractSt
                 t = wdata[k]
                 for j in Base.OneTo(N_MAX)
                     v = t[j]
-                    w[1, N_MAX, k] = v.x
-                    w[2, N_MAX, k] = v.y
-                    w[3, N_MAX, k] = zero(TF)
+                    w[1, j, k] = v.x
+                    w[2, j, k] = v.y
+                    w[3, j, k] = zero(TF)
                 end
             end
             w
