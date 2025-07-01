@@ -1,6 +1,6 @@
 module MPASMeshes
 
-using Reexport, Zeros, TensorsLite, ImmutableVectors
+using Reexport, Zeros, TensorsLite, SmallCollections
 @reexport using VoronoiMeshes
 using  VoronoiOperators
 

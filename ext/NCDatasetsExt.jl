@@ -1,20 +1,21 @@
 module NCDatasetsExt
 
-using MPASMeshes, VoronoiOperators, NCDatasets, TensorsLite, Zeros, ImmutableVectors
-import MPASMeshes: VoronoiMeshes
-import VoronoiMeshes: copy_matrix_to_tuple_vector!, save_to_netcdf!
+using VoronoiMeshes, VoronoiOperators, MPASMeshes, TensorsLite, Zeros, SmallCollections
+import VoronoiMeshes: copy_matrix_to_fixedvector_vector!, save_to_netcdf!, SmallVectorArray
+using NCDatasets
+using PrecompileTools
 
 function read_tanVelRecon(::Val{maxEdgesOnEdges}, nEdges::AbstractVector, ncfile) where {maxEdgesOnEdges}
     n = length(nEdges)
-    inds_tuple = Vector{NTuple{maxEdgesOnEdges, Int32}}(undef, n)
-    inds = ImmutableVectorArray(inds_tuple, nEdges)
+    inds_tuple = Vector{FixedVector{maxEdgesOnEdges, Int32}}(undef, n)
+    inds = SmallVectorArray(inds_tuple, nEdges)
     edgesOnEdgeArray = ncfile["edgesOnEdge"][:, :]::Matrix{Int32}
-    copy_matrix_to_tuple_vector!(inds_tuple, edgesOnEdgeArray)
+    copy_matrix_to_fixedvector_vector!(inds_tuple, edgesOnEdgeArray)
 
-    w_tuple = Vector{NTuple{maxEdgesOnEdges, Float64}}(undef, n)
-    w = ImmutableVectorArray(w_tuple, nEdges)
+    w_tuple = Vector{FixedVector{maxEdgesOnEdges, Float64}}(undef, n)
+    w = SmallVectorArray(w_tuple, nEdges)
     weightsArray = ncfile["weightsOnEdge"][:, :]::Matrix{Float64}
-    copy_matrix_to_tuple_vector!(w_tuple, weightsArray)
+    copy_matrix_to_fixedvector_vector!(w_tuple, weightsArray)
 
     method = if haskey(ncfile.attrib,"tangential_velocity_reconstruction_method")
         ncfile.attrib["tangential_velocity_reconstruction_method"]::String
@@ -237,6 +238,29 @@ function MPASMeshes.write_coeffs_scalar_reconstruct_to_grid_netcdf(filename::Abs
     return
 end
 
-include("precompile_NCDatasetsExt.jl")
+@setup_workload begin
+    bdir = string(Base.@__DIR__, "/")
+    fin = string(bdir, "../test/spherical_grid_500km.nc")
+    fout1 = string(bdir, "asda1_.nc")
+    fout1_graph = string(bdir, "asda1_.graph.info")
+    fout2 = string(bdir, "asda2_.nc")
+    fout2_graph = string(bdir, "asda2_.graph.info")
+    fout3 = string(bdir, "asda3_.nc")
+    fout3_graph = string(bdir, "asda3_.graph.info")
+
+    @compile_workload begin
+        regenerate_mesh(fin, fout1)
+        regenerate_mesh(fin, fout2, "peixoto")
+        regenerate_mesh(fin, fout3, "peixoto_vertex")
+    end
+
+    Base.Filesystem.rm(fout1)
+    Base.Filesystem.rm(fout1_graph)
+    Base.Filesystem.rm(fout2)
+    Base.Filesystem.rm(fout2_graph)
+    Base.Filesystem.rm(fout3)
+    Base.Filesystem.rm(fout3_graph)
+
+end
 
 end # module

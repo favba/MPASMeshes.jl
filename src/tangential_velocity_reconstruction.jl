@@ -1,7 +1,7 @@
 struct TangentialVelocityReconstructionGeneric{N_MAX, TI, TF} <: VoronoiOperators.TangentialVelocityReconstruction{N_MAX, TI, TF}
-    indices::ImVecArray{N_MAX, TI, 1}
-    weights::ImVecArray{N_MAX, TF, 1}
-    nEdges::Vector{UInt8}
+    indices::SmVecArray{N_MAX, TI, 1}
+    weights::SmVecArray{N_MAX, TF, 1}
+    nEdges::Vector{Int16}
     type::String
 end
 
