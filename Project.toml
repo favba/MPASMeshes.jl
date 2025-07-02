@@ -18,7 +18,7 @@ Zeros = "bd1ec220-6eb4-527a-9b49-e79c3db6233b"
 NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
 
 [extensions]
-NCDatasetsExt = ["NCDatasets", "VoronoiMeshes", "VoronoiOperators"]
+NCDatasetsExt = ["VoronoiMeshes", "NCDatasets"]
 
 [compat]
 NCDatasets = "0.14.6"
