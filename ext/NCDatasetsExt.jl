@@ -27,7 +27,7 @@ function read_tanVelRecon(::Val{maxEdgesOnEdges}, nEdges::AbstractVector, ncfile
 end
 
 function read_tanVelRecon(ncfile)
-    nEdges = UInt8.(ncfile["nEdgesOnEdge"][:]::Vector{Int32})
+    nEdges = Int16.(ncfile["nEdgesOnEdge"][:]::Vector{Int32})
     max_n_edges = Int(maximum(nEdges))
     return read_tanVelRecon(Val(max_n_edges), nEdges, ncfile)
 end
@@ -154,11 +154,7 @@ function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractSt
             ]
         )
 
-        if typeof(velRecon) <: CellVelocityReconstructionPerot
-            ds.attrib["cell_velocity_reconstruction_method"] = "Perot"
-        else #Add new methods here
-            error("Not implemented")
-        end
+        ds.attrib["cell_velocity_reconstruction_method"] = method_name(velRecon)
     end
 
     return
@@ -195,11 +191,7 @@ function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractSt
             ]
         )
 
-        if typeof(velRecon) <: VertexVelocityReconstructionPerot
-            ds.attrib["vertex_velocity_reconstruction_method"] = "Perot"
-        else #Add new methods here
-            error("Not implemented")
-        end
+        ds.attrib["vertex_velocity_reconstruction_method"] = method_name(velRecon)
     end
 
     return
@@ -222,17 +214,7 @@ function MPASMeshes.write_coeffs_scalar_reconstruct_to_grid_netcdf(filename::Abs
             ]
         )
 
-        if typeof(edgeToCell) <: EdgeToCellLSq2
-            ds.attrib["edge_to_cell_method"] = "LSq2"
-        elseif typeof(edgeToCell) <: EdgeToCellLSq3
-            ds.attrib["edge_to_cell_method"] = "LSq3"
-        elseif typeof(edgeToCell) <: EdgeToCellArea
-            ds.attrib["edge_to_cell_method"] = "Area"
-        elseif typeof(edgeToCell) <: EdgeToCellRingler
-            ds.attrib["edge_to_cell_method"] = "Ringler"
-        else #Add new methods here
-            error("Not implemented")
-        end
+        ds.attrib["edge_to_cell_method"] = method_name(edgeToCell)
     end
 
     return
