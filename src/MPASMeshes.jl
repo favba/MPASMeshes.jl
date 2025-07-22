@@ -31,7 +31,7 @@ struct MPASMesh{OnSphere, max_nEdges, max_nEdges2, TI, TF, TZ} <: AbstractVorono
         end
 
         tvr = TangentialVelocityReconstructionGeneric(tanVelRec)
-        attributes["tangential_velocity_reconstruction_method"] = tvr.type
+        attributes["tangential_velocity_reconstruction_method"] = tvr.method_name
 
         return new{OnSphere, max_nEdges, max_nEdges2, TI, TF, TZ}(cells, vertices, edges, tvr, attributes)
     end
@@ -145,6 +145,45 @@ function regenerate_mesh(inputfile::AbstractString, outputname::AbstractString, 
     if method == "trisk"
         mpas_mesh = MPASMesh(v_mesh)
         save(outputname, mpas_mesh)
+    elseif method == "peixoto"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+    elseif method == "peixoto_perot_perot"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionPerot(mpas_mesh), outputname)
+    elseif method == "peixoto_perot_lsq2"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionLSq2(mpas_mesh), outputname)
+    elseif method == "peixoto_lsq2_lsq2"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionLSq2(mpas_mesh), outputname)
+        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionLSq2(mpas_mesh), outputname)
+    elseif method == "thuburn_perot"
+        mpas_mesh = MPASMesh(v_mesh)
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+    elseif method == "thuburn_perot_perot"
+        mpas_mesh = MPASMesh(v_mesh)
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionPerot(mpas_mesh), outputname)
+    elseif method == "thuburn_lsq2_lsq2"
+        mpas_mesh = MPASMesh(v_mesh)
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionLSq2(mpas_mesh), outputname)
+        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionLSq2(mpas_mesh), outputname)
+    elseif method == "lsq2_lsq2_lsq2"
+        cR = CellVelocityReconstructionLSq2(v_mesh)
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionVelRecon(v_mesh, cR))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(cR, outputname)
+        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionLSq2(mpas_mesh), outputname)
     elseif method == "trisk_tangent_ke_area"
         mpas_mesh = MPASMesh(v_mesh)
         save(outputname, mpas_mesh)
@@ -157,15 +196,6 @@ function regenerate_mesh(inputfile::AbstractString, outputname::AbstractString, 
         mpas_mesh = MPASMesh(v_mesh)
         save(outputname, mpas_mesh)
         write_coeffs_scalar_reconstruct_to_grid(EdgeToCellLSq3(mpas_mesh), outputname)
-    elseif method == "peixoto"
-        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
-        save(outputname, mpas_mesh)
-        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
-    elseif method == "peixoto_vertex"
-        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
-        save(outputname, mpas_mesh)
-        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
-        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionPerot(mpas_mesh), outputname)
     elseif method == "peixoto_tangent_ke_area"
         mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
         save(outputname, mpas_mesh)
