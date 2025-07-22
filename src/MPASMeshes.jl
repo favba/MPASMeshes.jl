@@ -137,15 +137,17 @@ Regenerate the mesh given by `input_mesh_name` and write it to `out_file_name`.
 The new mesh will have the same Voronoi Diagram and cells / vertices ordering of the original mesh.
 The edge information will be completely recreated, and any indexing problem will be fixed.
 
-Opitionally, the `method` string specifies which method to use to compute the tangential velocity reconstruction weights and cell velocity reconstruction weights (if needed).
-Currently, valid options are "trisk" and "peixoto".
+Opitionally, the `method` string specifies which method to use to compute the tangential velocity reconstruction weights, cell velocity
+reconstruction weights (if needed), and vertex velocity reconstruction weights (if needed).
+Currently, valid options are "trisk", "peixoto", "peixoto_perot_perot", "peixoto_perot_lsq2", "peixoto_lsq2_lsq2", "thuburn_perot",
+"thuburn_perot_perot", "thuburn_perot_lsq2", "thuburn_lsq2_lsq2", and "lsq2_lsq2_lsq2".
 """
 function regenerate_mesh(inputfile::AbstractString, outputname::AbstractString, method="trisk")
     v_mesh = VoronoiMesh(fix_diagram!(VoronoiDiagram(inputfile)))
-    if method == "trisk"
+    if method == "trisk" #equivalent to "thuburn_ringler_gassman"
         mpas_mesh = MPASMesh(v_mesh)
         save(outputname, mpas_mesh)
-    elseif method == "peixoto"
+    elseif method == "peixoto" # equivalent to "peixoto_perot"
         mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
         save(outputname, mpas_mesh)
         write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
@@ -173,6 +175,11 @@ function regenerate_mesh(inputfile::AbstractString, outputname::AbstractString, 
         save(outputname, mpas_mesh)
         write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
         write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionPerot(mpas_mesh), outputname)
+    elseif method == "thuburn_perot_lsq2"
+        mpas_mesh = MPASMesh(v_mesh)
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+        write_coeffs_reconstruct_to_grid(VertexVelocityReconstructionLSq2(mpas_mesh), outputname)
     elseif method == "thuburn_lsq2_lsq2"
         mpas_mesh = MPASMesh(v_mesh)
         save(outputname, mpas_mesh)
