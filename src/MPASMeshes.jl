@@ -151,6 +151,10 @@ function regenerate_mesh(inputfile::AbstractString, outputname::AbstractString, 
         mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
         save(outputname, mpas_mesh)
         write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
+    elseif method == "peixoto_old"
+        mpas_mesh = MPASMesh(v_mesh, VoronoiOperators.TangentialVelocityReconstructionPeixotoOld(v_mesh))
+        save(outputname, mpas_mesh)
+        write_coeffs_reconstruct_to_grid(VoronoiOperators.CellVelocityReconstructionPerotOld(mpas_mesh), outputname)
     elseif method == "peixoto_perot_perot"
         mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
         save(outputname, mpas_mesh)

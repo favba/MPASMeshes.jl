@@ -227,6 +227,8 @@ end
     fout1_graph = string(bdir, "asda1_.graph.info")
     fout2 = string(bdir, "asda2_.nc")
     fout2_graph = string(bdir, "asda2_.graph.info")
+    fout2_1 = string(bdir, "asda2_1.nc")
+    fout2_1_graph = string(bdir, "asda2_1.graph.info")
     fout3 = string(bdir, "asda3_.nc")
     fout3_graph = string(bdir, "asda3_.graph.info")
     fout4 = string(bdir, "asda4_.nc")
@@ -235,6 +237,7 @@ end
     @compile_workload begin
         regenerate_mesh(fin, fout1)
         regenerate_mesh(fin, fout2, "peixoto")
+        regenerate_mesh(fin, fout2_1, "peixoto_old")
         regenerate_mesh(fin, fout3, "peixoto_perot_perot")
         regenerate_mesh(fin, fout4, "lsq2_lsq2_lsq2")
     end
@@ -243,6 +246,8 @@ end
     Base.Filesystem.rm(fout1_graph)
     Base.Filesystem.rm(fout2)
     Base.Filesystem.rm(fout2_graph)
+    Base.Filesystem.rm(fout2_1)
+    Base.Filesystem.rm(fout2_1_graph)
     Base.Filesystem.rm(fout3)
     Base.Filesystem.rm(fout3_graph)
     Base.Filesystem.rm(fout4)
