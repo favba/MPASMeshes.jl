@@ -87,7 +87,7 @@ function compute_mpas_fields!(mesh::MPASMesh)
     return mesh
 end
 
-function VoronoiMeshes.save(filename, obj::MPASMesh; kwds...)
+function VoronoiMeshes.save(filename::String, obj::MPASMesh; kwds...)
     name, ext = Base.Filesystem.splitext(filename)
     if ext == ".nc"
         compute_mpas_fields!(obj)
@@ -106,7 +106,7 @@ for N in 6:9
     end
 end
 
-function write_coeffs_reconstruct_to_grid(velRecon::Union{<:CellVelocityReconstruction,<:VertexVelocityReconstruction}, filename::AbstractString)
+function write_coeffs_reconstruct_to_grid(velRecon::Union{<:CellVelocityReconstruction,<:VertexVelocityReconstruction}, filename::String)
     _, ext = Base.Filesystem.splitext(filename)
     if ext == ".nc"
         write_coeffs_reconstruct_to_grid_netcdf(filename, velRecon)
@@ -116,7 +116,7 @@ function write_coeffs_reconstruct_to_grid(velRecon::Union{<:CellVelocityReconstr
     return nothing
 end
 
-function write_coeffs_scalar_reconstruct_to_grid(edgeToCell::EdgeToCellTransformation, filename::AbstractString)
+function write_coeffs_scalar_reconstruct_to_grid(edgeToCell::EdgeToCellTransformation, filename::String)
     _, ext = Base.Filesystem.splitext(filename)
     if ext == ".nc"
         write_coeffs_scalar_reconstruct_to_grid_netcdf(filename, edgeToCell)
@@ -131,7 +131,7 @@ function write_coeffs_reconstruct_to_grid_netcdf end
 function write_coeffs_scalar_reconstruct_to_grid_netcdf end
 
 """
-    regenerate_mesh(input_mesh_name::AbstractString, out_file_name::AbstractString, [method::AbstractString = "trisk"]) -> nothing
+    regenerate_mesh(input_mesh_name::String, out_file_name::String, [method::String = "trisk"]) -> nothing
 
 Regenerate the mesh given by `input_mesh_name` and write it to `out_file_name`.
 The new mesh will have the same Voronoi Diagram and cells / vertices ordering of the original mesh.
@@ -142,7 +142,7 @@ reconstruction weights (if needed), and vertex velocity reconstruction weights (
 Currently, valid options are "trisk", "peixoto", "peixoto_perot_perot", "peixoto_perot_lsq2", "peixoto_lsq2_lsq2", "thuburn_perot",
 "thuburn_perot_perot", "thuburn_perot_lsq2", "thuburn_lsq2_lsq2", and "lsq2_lsq2_lsq2".
 """
-function regenerate_mesh(inputfile::AbstractString, outputname::AbstractString, method="trisk")
+function regenerate_mesh(inputfile::String, outputname::String, method="trisk")
     v_mesh = VoronoiMesh(fix_diagram!(VoronoiDiagram(inputfile)))
     if method == "trisk" #equivalent to "thuburn_ringler_gassman"
         mpas_mesh = MPASMesh(v_mesh)

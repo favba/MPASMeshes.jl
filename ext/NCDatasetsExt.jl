@@ -123,7 +123,7 @@ function save_to_netcdf!(ds::NCDataset, mesh::MPASMesh{S, N, N2, TI}; force3D::B
     return ds
 end
 
-function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractString, velRecon::CellVelocityReconstruction{N_MAX, TI, TF, TZ}) where {N_MAX, TI, TF, TZ}
+function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::String, velRecon::CellVelocityReconstruction{N_MAX, TI, TF, TZ}) where {N_MAX, TI, TF, TZ}
 
     NCDataset(filename, "a") do ds
 
@@ -160,7 +160,7 @@ function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractSt
     return
 end
 
-function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractString, velRecon::VertexVelocityReconstruction{TI, TF, TZ}) where {TI, TF, TZ}
+function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::String, velRecon::VertexVelocityReconstruction{TI, TF, TZ}) where {TI, TF, TZ}
 
     NCDataset(filename, "a") do ds
 
@@ -198,7 +198,7 @@ function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::AbstractSt
 end
 
 
-function MPASMeshes.write_coeffs_scalar_reconstruct_to_grid_netcdf(filename::AbstractString, edgeToCell::EdgeToCellTransformation{N_MAX, TI, TF}) where {N_MAX, TI, TF}
+function MPASMeshes.write_coeffs_scalar_reconstruct_to_grid_netcdf(filename::String, edgeToCell::EdgeToCellTransformation{N_MAX, TI, TF}) where {N_MAX, TI, TF}
 
     NCDataset(filename, "a") do ds
 
