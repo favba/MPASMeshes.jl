@@ -33,7 +33,7 @@ function read_tanVelRecon(ncfile)
 end
 
 function _MPASMesh(ncfile::NCDatasets.NCDataset)
-    voro_mesh = VoronoiMesh(ncfile, false)
+    voro_mesh = VoronoiMesh(ncfile, warn_issues=false)
     tanVelRecon = read_tanVelRecon(ncfile)
     attrib = convert(Dict{String, Union{String, Float64, Int32, Int64}}, ncfile.attrib)
     return MPASMesh(voro_mesh.cells, voro_mesh.vertices, voro_mesh.edges, tanVelRecon, attrib)
