@@ -69,7 +69,7 @@ MPASMesh(mesh::AbstractVoronoiMesh, tanVelRec::TangentialVelocityReconstruction)
 MPASMesh(mesh::AbstractVoronoiMesh) = MPASMesh(mesh, TangentialVelocityReconstructionThuburn(mesh))
 
 MPASMesh(N::Integer, lx::Real, ly::Real; kwd...) = MPASMesh(VoronoiMesh(N, lx, ly; kwd...))
-MPASMesh(points::AbstractVector{<:AbstractVec}, lx::Real, ly::Real; kwd...) = MPASMesh(VoronoiMesh(points, lx, ly; kwd...))
+MPASMesh(points::AbstractVector{<:Vec}, lx::Real, ly::Real; kwd...) = MPASMesh(VoronoiMesh(points, lx, ly; kwd...))
 
 function compute_mpas_fields!(mesh::MPASMesh)
     mesh.cells.area
