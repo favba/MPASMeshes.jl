@@ -221,37 +221,40 @@ function MPASMeshes.write_coeffs_scalar_reconstruct_to_grid_netcdf(filename::Str
 end
 
 @setup_workload begin
-    bdir = string(Base.@__DIR__, "/")
-    fin = string(bdir, "../test/spherical_grid_500km.nc")
-    fout1 = string(bdir, "asda1_.nc")
-    fout1_graph = string(bdir, "asda1_.graph.info")
-    fout2 = string(bdir, "asda2_.nc")
-    fout2_graph = string(bdir, "asda2_.graph.info")
-    fout2_1 = string(bdir, "asda2_1.nc")
-    fout2_1_graph = string(bdir, "asda2_1.graph.info")
-    fout3 = string(bdir, "asda3_.nc")
-    fout3_graph = string(bdir, "asda3_.graph.info")
-    fout4 = string(bdir, "asda4_.nc")
-    fout4_graph = string(bdir, "asda4_.graph.info")
+    files = ("../test/spherical_unif_grid_4000km.nc", "../test/spherical_unif_grid_2000km.nc", "../test/spherical_grid_500km.nc")
+    for f in files
+        bdir = string(Base.@__DIR__, "/")
+        fin = string(bdir, f)
+        fout1 = string(bdir, "asda1_.nc")
+        fout1_graph = string(bdir, "asda1_.graph.info")
+        fout2 = string(bdir, "asda2_.nc")
+        fout2_graph = string(bdir, "asda2_.graph.info")
+        fout2_1 = string(bdir, "asda2_1.nc")
+        fout2_1_graph = string(bdir, "asda2_1.graph.info")
+        fout3 = string(bdir, "asda3_.nc")
+        fout3_graph = string(bdir, "asda3_.graph.info")
+        fout4 = string(bdir, "asda4_.nc")
+        fout4_graph = string(bdir, "asda4_.graph.info")
 
-    @compile_workload begin
-        regenerate_mesh(fin, fout1)
-        regenerate_mesh(fin, fout2, "peixoto")
-        regenerate_mesh(fin, fout2_1, "peixoto_old")
-        regenerate_mesh(fin, fout3, "peixoto_perot_perot")
-        regenerate_mesh(fin, fout4, "lsq2_lsq2_lsq2")
+        @compile_workload begin
+            regenerate_mesh(fin, fout1)
+            regenerate_mesh(fin, fout2, reconstruction_method = "peixoto")
+            regenerate_mesh(fin, fout2_1, reconstruction_method = "peixoto_old")
+            regenerate_mesh(fin, fout3, area_type = "geometric")
+            regenerate_mesh(fin, fout4, reconstruction_method = "lsq2")
+        end
+
+        Base.Filesystem.rm(fout1)
+        Base.Filesystem.rm(fout1_graph)
+        Base.Filesystem.rm(fout2)
+        Base.Filesystem.rm(fout2_graph)
+        Base.Filesystem.rm(fout2_1)
+        Base.Filesystem.rm(fout2_1_graph)
+        Base.Filesystem.rm(fout3)
+        Base.Filesystem.rm(fout3_graph)
+        Base.Filesystem.rm(fout4)
+        Base.Filesystem.rm(fout4_graph)
     end
-
-    Base.Filesystem.rm(fout1)
-    Base.Filesystem.rm(fout1_graph)
-    Base.Filesystem.rm(fout2)
-    Base.Filesystem.rm(fout2_graph)
-    Base.Filesystem.rm(fout2_1)
-    Base.Filesystem.rm(fout2_1_graph)
-    Base.Filesystem.rm(fout3)
-    Base.Filesystem.rm(fout3_graph)
-    Base.Filesystem.rm(fout4)
-    Base.Filesystem.rm(fout4_graph)
 
 end
 
