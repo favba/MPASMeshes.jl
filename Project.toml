@@ -1,7 +1,7 @@
 name = "MPASMeshes"
 uuid = "55014cf3-5e3e-4aa4-8df2-e07191383b05"
-authors = ["Felipe A. V. de Bragança Alves <favbalves@gmail.com> and contributors"]
 version = "1.0.0-DEV"
+authors = ["Felipe A. V. de Bragança Alves <favbalves@gmail.com> and contributors"]
 
 [deps]
 PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
@@ -14,31 +14,31 @@ VoronoiMeshes = "978c199f-fe38-4011-9fe6-317bc1cdd350"
 VoronoiOperators = "28deb5e7-6037-4488-9d39-5419413b6983"
 Zeros = "bd1ec220-6eb4-527a-9b49-e79c3db6233b"
 
-[sources]
-TensorsLite = {url = "https://github.com/favba/TensorsLite.jl"}
-TensorsLiteGeometry = {url = "https://github.com/favba/TensorsLiteGeometry.jl"}
-VoronoiMeshes = {url = "https://github.com/favba/VoronoiMeshes.jl"}
-VoronoiOperators = {url = "https://github.com/favba/VoronoiOperators.jl"}
-
 [weakdeps]
 NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
+
+[sources]
+TensorsLite = {rev = "main", url = "https://github.com/favba/TensorsLite.jl"}
+TensorsLiteGeometry = {rev = "main", url = "https://github.com/favba/TensorsLiteGeometry.jl"}
+VoronoiMeshes = {rev = "main", url = "https://github.com/favba/VoronoiMeshes.jl"}
+VoronoiOperators = {rev = "main", url = "https://github.com/favba/VoronoiOperators.jl"}
 
 [extensions]
 NCDatasetsExt = ["VoronoiMeshes", "NCDatasets"]
 
 [compat]
+NCDatasets = "0.14"
 PrecompileTools = "1"
 Random = "1"
 Reexport = "1"
 SmallCollections = "0.4.1, 0.5"
 Zeros = "0.4"
 julia = "1.10"
-NCDatasets = "0.14"
 
 [extras]
+DelaunayTriangulation = "927a84f5-c5f4-47a5-9785-b46e178433df"
 NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-DelaunayTriangulation = "927a84f5-c5f4-47a5-9785-b46e178433df"
 
 [targets]
 test = ["Test", "NCDatasets", "DelaunayTriangulation"]
