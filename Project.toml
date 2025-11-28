@@ -15,6 +15,7 @@ VoronoiOperators = "28deb5e7-6037-4488-9d39-5419413b6983"
 Zeros = "bd1ec220-6eb4-527a-9b49-e79c3db6233b"
 
 [weakdeps]
+Comonicon = "863f3e99-da2a-4334-8734-de3dacbe5542"
 NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
 
 [sources]
@@ -25,8 +26,10 @@ VoronoiOperators = {rev = "main", url = "https://github.com/favba/VoronoiOperato
 
 [extensions]
 NCDatasetsExt = ["VoronoiMeshes", "NCDatasets"]
+ComoniconExt = ["VoronoiMeshes", "NCDatasets", "Comonicon"]
 
 [compat]
+Comonicon = "1"
 NCDatasets = "0.14"
 PrecompileTools = "1"
 Random = "1"
@@ -36,9 +39,10 @@ Zeros = "0.4"
 julia = "1.10"
 
 [extras]
+Comonicon = "863f3e99-da2a-4334-8734-de3dacbe5542"
 DelaunayTriangulation = "927a84f5-c5f4-47a5-9785-b46e178433df"
 NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "NCDatasets", "DelaunayTriangulation"]
+test = ["Test", "NCDatasets", "DelaunayTriangulation", "Comonicon"]

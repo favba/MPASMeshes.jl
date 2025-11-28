@@ -1,4 +1,4 @@
-using NCDatasets, DelaunayTriangulation, MPASMeshes
+using NCDatasets, DelaunayTriangulation, MPASMeshes, Comonicon
 using Test
 
 @testset "MPASMeshes.jl" begin
@@ -32,4 +32,18 @@ using Test
         @test e1.longitude == e2.longitude
         @test e1.latitude == e2.latitude
     end
+end
+
+@testset "regenerate_mesh" begin
+    regenerate_mesh(["spherical_unif_grid_4000km.nc", "test_mesh.nc", "-a", "geometric"])
+    mo = MPASMesh("spherical_unif_grid_4000km.nc")
+    mn = MPASMesh("test_mesh.nc")
+    Base.Filesystem.rm("test_mesh.nc")
+    Base.Filesystem.rm("test_mesh.graph.info")
+
+    @test mo.cells.position == mn.cells.position
+    @test mo.vertices.position == mn.vertices.position
+    @test mo.cells.areaMimetic == mn.cells.areaMimetic
+    @test mo.vertices.areaMimetic == mn.vertices.areaMimetic
+
 end
