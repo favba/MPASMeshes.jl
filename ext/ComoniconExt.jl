@@ -7,12 +7,13 @@ import MPASMeshes
 """
     regenerate_mesh(grid::String, output::String; [tangent_reconstruction::String = "trisk", area_type::String = "mimetic") -> nothing
 
-Regenerate the mesh given by `input_mesh_name` and write it to `out_file_name`.
+# Intro 
+ 
+Regenerate the mesh given by `grid` and write it to `output`.
 The new mesh will have the same Voronoi Diagram and cells / vertices ordering of the original mesh.
 The edge information will be completely recreated, and any indexing problem will be fixed.
-
-Opitionally, the `reconstruction_method` string specifies which method to use to compute the tangential velocity reconstruction weights.
-Currently, valid options are "trisk", "peixoto", "peixoto_old", and "lsq2".
+Opitionally, the `tangent_reconstruction` string specifies which method to use to compute the tangential velocity reconstruction weights.
+and the `area_type` string specifies the area computation methods.
 
 # Arguments
 
@@ -25,7 +26,7 @@ Currently, valid options are "trisk", "peixoto", "peixoto_old", and "lsq2".
 - `-a, --area_type`: Areas computation method. Available options: "geometric" for the true geometrical area; "mimetic" for area values suitable for the trisk mimetic scheme. Default is "mimetic".
 """
 Comonicon.@main function regenerate_mesh(grid::String, output::String;
-    tangent_reconstruction::String="trisk",
+    tangent_reconstruction::String="thuburn",
     area_type::String="mimetic")
 
     MPASMeshes.regenerate_mesh(grid, output; reconstruction_method=tangent_reconstruction, area_type=area_type)

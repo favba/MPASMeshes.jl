@@ -123,9 +123,9 @@ function save_to_netcdf!(ds::NCDataset, mesh::MPASMesh{S, N, N2, TI}; force3D::B
     return ds
 end
 
-function MPASMeshes.regenerate_mesh(inputfile::String, outputname::String; reconstruction_method="trisk", area_type="mimetic")
+function MPASMeshes.regenerate_mesh(inputfile::String, outputname::String; reconstruction_method="thuburn", area_type="mimetic")
     v_mesh = VoronoiMesh(fix_diagram!(VoronoiDiagram(inputfile)))
-    if reconstruction_method == "trisk"
+    if reconstruction_method == "thuburn"
         mpas_mesh = MPASMesh(v_mesh)
         save(outputname, mpas_mesh, area_type)
     elseif reconstruction_method == "peixoto"
