@@ -123,101 +123,25 @@ function save_to_netcdf!(ds::NCDataset, mesh::MPASMesh{S, N, N2, TI}; force3D::B
     return ds
 end
 
-function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::String, velRecon::CellVelocityReconstruction{N_MAX, TI, TF, TZ}) where {N_MAX, TI, TF, TZ}
-
-    NCDataset(filename, "a") do ds
-
-        ncells = length(velRecon.weights)
-
-        weights = if (TZ === TF)
-            reshape(reinterpret(TF, velRecon.weights.data), (3, N_MAX, ncells))
-        else
-            wdata = velRecon.weights.data
-            w = Array{TF}(undef, (3, N_MAX, ncells))
-            @inbounds for k in Base.OneTo(ncells)
-                t = wdata[k]
-                for j in Base.OneTo(N_MAX)
-                    v = t[j]
-                    w[1, j, k] = v.x
-                    w[2, j, k] = v.y
-                    w[3, j, k] = zero(TF)
-                end
-            end
-            w
-        end
-
-        defVar(
-            ds, "coeffs_reconstruct", weights,
-            ("R3", "maxEdges", "nCells"), attrib = [
-                "units" => "-",
-                "long_name" => "Coefficients to reconstruct velocity vectors at cell centers",
-            ]
-        )
-
-        ds.attrib["cell_velocity_reconstruction_method"] = method_name(velRecon)
+function MPASMeshes.regenerate_mesh(inputfile::String, outputname::String; reconstruction_method="trisk", area_type="mimetic")
+    v_mesh = VoronoiMesh(fix_diagram!(VoronoiDiagram(inputfile)))
+    if reconstruction_method == "trisk"
+        mpas_mesh = MPASMesh(v_mesh)
+        save(outputname, mpas_mesh, area_type)
+    elseif reconstruction_method == "peixoto"
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
+        save(outputname, mpas_mesh, area_type)
+    elseif reconstruction_method == "peixoto_old"
+        mpas_mesh = MPASMesh(v_mesh, VoronoiOperators.TangentialVelocityReconstructionPeixotoOld(v_mesh))
+        save(outputname, mpas_mesh, area_type)
+    elseif reconstruction_method == "lsq2"
+        cR = CellVelocityReconstructionLSq2(v_mesh)
+        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionVelRecon(v_mesh, cR))
+        save(outputname, mpas_mesh, area_type)
+    else
+        error("Method '$reconstruction_method' not implemented")
     end
-
-    return
-end
-
-function MPASMeshes.write_coeffs_reconstruct_to_grid_netcdf(filename::String, velRecon::VertexVelocityReconstruction{TI, TF, TZ}) where {TI, TF, TZ}
-
-    NCDataset(filename, "a") do ds
-
-        nvertices = length(velRecon.weights)
-
-        weights = if (TZ === TF)
-            reshape(reinterpret(TF, velRecon.weights), (3, 3, nvertices))
-        else
-            wdata = velRecon.weights
-            w = Array{TF}(undef, (3, 3, nvertices))
-            @inbounds for k in Base.OneTo(nvertices)
-                t = wdata[k]
-                for j in Base.OneTo(3)
-                    v = t[j]
-                    w[1, j, k] = v.x
-                    w[2, j, k] = v.y
-                    w[3, j, k] = zero(TF)
-                end
-            end
-            w
-        end
-
-        defVar(
-            ds, "vertex_coeffs_reconstruct", weights,
-            ("R3", "vertexDegree", "nVertices"), attrib = [
-                "units" => "-",
-                "long_name" => "Coefficients to reconstruct velocity vectors at vertices",
-            ]
-        )
-
-        ds.attrib["vertex_velocity_reconstruction_method"] = method_name(velRecon)
-    end
-
-    return
-end
-
-
-function MPASMeshes.write_coeffs_scalar_reconstruct_to_grid_netcdf(filename::String, edgeToCell::EdgeToCellTransformation{N_MAX, TI, TF}) where {N_MAX, TI, TF}
-
-    NCDataset(filename, "a") do ds
-
-        ncells = length(edgeToCell.weights)
-
-        weights = reshape(reinterpret(TF, edgeToCell.weights.data), (N_MAX, ncells))
-
-        defVar(
-            ds, "coeffs_scalar_reconstruct", weights,
-            ("maxEdges", "nCells"), attrib = [
-                "units" => "-",
-                "long_name" => "Coefficients to reconstruct edge scalar field at cell centers",
-            ]
-        )
-
-        ds.attrib["edge_to_cell_method"] = method_name(edgeToCell)
-    end
-
-    return
+    return nothing
 end
 
 @setup_workload begin

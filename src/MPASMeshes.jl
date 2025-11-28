@@ -111,35 +111,13 @@ function VoronoiMeshes.save(filename::String, obj::MPASMesh, area_type::String="
 end
 
 for N in 6:9
-    for N2 in 8:(2N)
-        precompile(compute_mpas_fields!, (MPASMesh{false, N, N2, Int32, Float64, Zeros.Zero},))
-        precompile(compute_mpas_fields!, (MPASMesh{true, N, N2, Int32, Float64, Float64},))
+    for N2 in 10:(2N)
+        precompile(compute_mpas_fields!, (MPASMesh{false, N, N2, Int32, Float64, Zeros.Zero}, String))
+        precompile(compute_mpas_fields!, (MPASMesh{true, N, N2, Int32, Float64, Float64}, String))
     end
-end
-
-function write_coeffs_reconstruct_to_grid(velRecon::Union{<:CellVelocityReconstruction,<:VertexVelocityReconstruction}, filename::String)
-    _, ext = Base.Filesystem.splitext(filename)
-    if ext == ".nc"
-        write_coeffs_reconstruct_to_grid_netcdf(filename, velRecon)
-    else
-        error("Unsupported file extension: $filename")
-    end
-    return nothing
-end
-
-function write_coeffs_scalar_reconstruct_to_grid(edgeToCell::EdgeToCellTransformation, filename::String)
-    _, ext = Base.Filesystem.splitext(filename)
-    if ext == ".nc"
-        write_coeffs_scalar_reconstruct_to_grid_netcdf(filename, edgeToCell)
-    else
-        error("Unsupported file extension: $filename")
-    end
-    return nothing
 end
 
 #implemented in NCDatasetsExt.jl
-function write_coeffs_reconstruct_to_grid_netcdf end
-function write_coeffs_scalar_reconstruct_to_grid_netcdf end
 
 """
     regenerate_mesh(input_mesh_name::String, out_file_name::String, [method::String = "trisk"]) -> nothing
@@ -151,27 +129,6 @@ The edge information will be completely recreated, and any indexing problem will
 Opitionally, the `reconstruction_method` string specifies which method to use to compute the tangential velocity reconstruction weights.
 Currently, valid options are "trisk", "peixoto", "peixoto_old", and "lsq2".
 """
-function regenerate_mesh(inputfile::String, outputname::String; reconstruction_method="trisk", area_type="mimetic")
-    v_mesh = VoronoiMesh(fix_diagram!(VoronoiDiagram(inputfile)))
-    if reconstruction_method == "trisk"
-        mpas_mesh = MPASMesh(v_mesh)
-        save(outputname, mpas_mesh, area_type)
-    elseif reconstruction_method == "peixoto"
-        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionPeixoto(v_mesh))
-        save(outputname, mpas_mesh, area_type)
-        write_coeffs_reconstruct_to_grid(CellVelocityReconstructionPerot(mpas_mesh), outputname)
-    elseif reconstruction_method == "peixoto_old"
-        mpas_mesh = MPASMesh(v_mesh, VoronoiOperators.TangentialVelocityReconstructionPeixotoOld(v_mesh))
-        save(outputname, mpas_mesh, area_type)
-        write_coeffs_reconstruct_to_grid(VoronoiOperators.CellVelocityReconstructionPerotOld(mpas_mesh), outputname)
-    elseif reconstruction_method == "lsq2"
-        cR = CellVelocityReconstructionLSq2(v_mesh)
-        mpas_mesh = MPASMesh(v_mesh, TangentialVelocityReconstructionVelRecon(v_mesh, cR))
-        save(outputname, mpas_mesh, area_type)
-    else
-        error("Method '$reconstruction_method' not implemented")
-    end
-    return nothing
-end
+function regenerate_mesh end
 
 end
