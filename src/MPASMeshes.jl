@@ -120,14 +120,14 @@ end
 #implemented in NCDatasetsExt.jl
 
 """
-    regenerate_mesh(input_mesh_name::String, out_file_name::String, [method::String = "trisk"]) -> nothing
+    regenerate_mesh(input_mesh_name::String, out_file_name::String, [method::String = "thuburn"]) -> nothing
 
 Regenerate the mesh given by `input_mesh_name` and write it to `out_file_name`.
 The new mesh will have the same Voronoi Diagram and cells / vertices ordering of the original mesh.
 The edge information will be completely recreated, and any indexing problem will be fixed.
 
 Opitionally, the `reconstruction_method` string specifies which method to use to compute the tangential velocity reconstruction weights.
-Currently, valid options are "trisk", "peixoto", "peixoto_old", and "lsq2".
+Currently, valid options are "thuburn", "peixoto", "peixoto_old", and "lsq2".
 """
 function regenerate_mesh end
 
