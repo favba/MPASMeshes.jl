@@ -57,31 +57,12 @@ function MPASMeshes.MPASMesh(file_name::String, warn_issues::Bool = true)
 end
 
 function write_tanVelRecon_data!(ds::NCDataset, tanVelRecon::MPASMeshes.TangentialVelocityReconstructionGeneric{N, TI, TF}) where {N, TI, TF}
-    ds.dim["maxEdges2"] = N
 
-    defVar(
-        ds, "nEdgesOnEdge", TI.(tanVelRecon.nEdges),
-        ("nEdges",), attrib = [
-            "units" => "-",
-            "long_name" => "Number of edges involved in reconstruction of tangential velocity for an edge.",
-        ]
-    )
+    write_field_to_netcdf!(ds, tanVelRecon.nEdges, "nEdgesOnEdge", "nEdges", ["units" => "-", "long_name" => "Number of edges involved in reconstruction of tangential velocity for an edge."])
 
-    defVar(
-        ds, "edgesOnEdge", reinterpret(reshape, TI, tanVelRecon.indices.data),
-        ("maxEdges2", "nEdges"), attrib = [
-            "units" => "-",
-            "long_name" => "IDs of edges involved in reconstruction of tangential velocity for an edge.",
-        ]
-    )
+    write_field_to_netcdf!(ds, tanVelRecon.indices, "edgesOnEdge", ("maxEdges2", "nEdges"), ["units" => "-", "long_name" => "IDs of edges involved in reconstruction of tangential velocity for an edge."])
 
-    defVar(
-        ds, "weightsOnEdge", reinterpret(reshape, TF, tanVelRecon.weights.data),
-        ("maxEdges2", "nEdges"), attrib = [
-            "units" => "-",
-            "long_name" => "Weights used in reconstruction of tangential velocity for an edge.",
-        ]
-    )
+    write_field_to_netcdf!(ds, tanVelRecon.weights, "weightsOnEdge", ("maxEdges2", "nEdges"), ["units" => "-", "long_name" => "Weights used in reconstruction of tangential velocity for an edge."])
 
     return ds
 end
@@ -90,29 +71,11 @@ function save_to_netcdf!(ds::NCDataset, mesh::MPASMesh{S, N, N2, TI}; force3D::B
 
     save_to_netcdf!(ds, VoronoiMesh(mesh.cells, mesh.vertices, mesh.edges), force3D = true, write_computed = true)
 
-    defVar(
-        ds, "indexToCellID", TI.(1:mesh.cells.n),
-        ("nCells",), attrib = [
-            "units" => "-",
-            "long_name" => "Mapping from local array index to global cell ID",
-        ]
-    )
+    write_field_to_netcdf!(ds, TI.(1:mesh.cells.n), "indexToCellID", "nCells", ["units" => "-", "long_name" => "Mapping from local array index to global cell ID"])
 
-    defVar(
-        ds, "indexToVertexID", TI.(1:mesh.vertices.n),
-        ("nVertices",), attrib = [
-            "units" => "-",
-            "long_name" => "Mapping from local array index to global vertex ID",
-        ]
-    )
+    write_field_to_netcdf!(ds, TI.(1:mesh.vertices.n), "indexToVertexID", "nVertices", ["units" => "-", "long_name" => "Mapping from local array index to global vertex ID"])
 
-    defVar(
-        ds, "indexToEdgeID", TI.(1:mesh.edges.n),
-        ("nEdges",), attrib = [
-            "units" => "-",
-            "long_name" => "Mapping from local array index to global edge ID",
-        ]
-    )
+    write_field_to_netcdf!(ds, TI.(1:mesh.edges.n), "indexToEdgeID", "nEdges", ["units" => "-", "long_name" => "Mapping from local array index to global edge ID"])
 
     write_tanVelRecon_data!(ds, mesh.tanVelRec)
 
