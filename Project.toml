@@ -1,6 +1,6 @@
 name = "MPASMeshes"
 uuid = "55014cf3-5e3e-4aa4-8df2-e07191383b05"
-version = "1.0.0-DEV"
+version = "0.1.0"
 authors = ["Felipe A. V. de Bragança Alves <favbalves@gmail.com> and contributors"]
 
 [deps]
@@ -36,6 +36,10 @@ Random = "1"
 Reexport = "1"
 SmallCollections = "0.4.1, 0.5, 0.6"
 Zeros = "0.4"
+TensorsLite = "0.1"
+TensorsLiteGeometry = "0.1"
+VoronoiMeshes = "0.1"
+VoronoiOperators = "0.1"
 julia = "1.10"
 
 [extras]
